@@ -1,5 +1,6 @@
 import numpy as np
-import cv2
+from cv2 import cv2
+import matplotlib.pyplot as plt
 from PIL import Image
 
 #function to update the values in p1 and p2 arrays
@@ -7,7 +8,7 @@ def pinit(x1,x2,y1,y2,a1,a2,b1,b2,m,n,p1,p2):
     
     c=0
 
-    for i in range(0,m*n):
+    for _ in range(0,m*n):
         
             s1,s2 = 0,0
             if(c%2 == 0 ):
@@ -33,7 +34,7 @@ def pinit(x1,x2,y1,y2,a1,a2,b1,b2,m,n,p1,p2):
 
 #iterating through the initial randomness
 def xyinit(x1,x2,y1,y2,a1,a2,b1,b2):
-    for i in range(0,1000):
+    for _ in range(0,1000):
         t = x1
         x1 =  (x1 + y1*a1) % 1.0
         y1 =  (b1*t + y1*(1+a1*b1)) % 1.0
@@ -73,9 +74,10 @@ def kinit(K,u,v,p1,p2,r,N,m,n,arr):
 
 def main():
     #reading the image and storing it in an array
-    img = cv2.imread('hardik_1.png',0)
+    img = cv2.imread(r'C:\Users\hardi\Documents\GitHub\AES-based-Image-encryption\src\image.png',0)
     m,n = img.shape
     arr = img
+    #print(m,n)
 
     #initializing the parameters for chaos map
     x1,y1,a1,b1 = 0.75,0.53,3.0,4.0
@@ -89,7 +91,7 @@ def main():
     x1,x2,y1,y2 = pinit(x1,x2,y1,y2,a1,a2,b1,b2,m,n,p1,p2)
 
     #N is the number of rounds
-    N=16
+    N=10
 
     #r is the index from which values will be taken for scrambling the image for key generation
     r = np.zeros(N+2,int)
@@ -104,5 +106,7 @@ def main():
     #K is the key matrix where K[i] represents key for ith round
     K = np.array([arr]*(N+2) , int)
     K = kinit(K,u,v,p1,p2,r,N,m,n,arr)
+    
+    return K
 
 main()
