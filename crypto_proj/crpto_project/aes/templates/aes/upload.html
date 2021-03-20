@@ -1,0 +1,49 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata">
+
+<style>
+    body, html {
+      height: 100%;
+      font-family: "Inconsolata", sans-serif;
+      background-color:  #afa5a539;
+    }
+
+</style>
+
+<h1>Kindly upload image</h1>
+<div class="container">
+  
+    <form action="." method="post"  enctype="multipart/form-data">
+
+        {% csrf_token %}
+        {{form.as_p}}
+       
+        <button type="submit" class="btn btn-lg btn-success">Upload</button>
+    </form>
+   
+    {% if obj %}
+    <h3>Succesfully uploaded : {{img_obj.caption}}</h3>
+    <img src="{{ obj.image.url}}" alt="image" class="img-thumbnail"  >
+    {% endif %}
+    <hr>
+
+  
+    {% for x in img %}
+    {% if forloop.first %}<div class="row ">{% endif %}
+        <div class="col-lg-4 col-md-4 col-12" >
+    <div class="text-center mt-2">
+        <img src="{{x.image.url}}"  height="20%" width="20%" class="img-thumbnail" alt="...">
+        <h2 class="text-center" >{{x.caption}}</h2></div>
+        </div>
+        {% if forloop.counter|divisibleby:3 %}
+    </div>
+    <div class=row>{% endif %}
+    
+        {% if forloop.last %}</div>{% endif %}
+
+    {% endfor %}
+
+    <button type="button" class="btn btn-lg "><a href="/encrypted/">View Encryption Image</a></button>
+</div>
