@@ -43,53 +43,48 @@ def right_cycle(N, count):
 
           
 
-def encrypt():
+def decrypt():
     keys = get_roundkeys()
     
-    #adding round 0 key
-    cipher = [[[] for __ in range(m) ] for _ in range(11)]
+    #round 10 key
+    decipher = [[[] for __ in range(m) ] for _ in range(11)]
 
     for i in range(m):
         for j in range(n):
-            cipher[0][i].append(keys[0][i][j] ^ matrix[i][j])
-    #print(cipher[0])
+            decipher[0][i].append(keys[10][i][j] ^ matrix[i][j])
+    #print(decipher[0])
     
-    #rounds 1-9
+    #rounds 9-1
 
-    for i in range(1,10):
+    for i in range(9,0,-1):
         sum=0
         for j in range(m):
                 for k in range(n):
-                    sum=sum+cipher[i-1][j][k]
+                    sum=sum+decipher[9-i][j][k]
         
 
        
         if i%2==0:
-            #diffusion step
-            diff_state = [[] for _ in range(m)]
+              
+            
+            
+            #add roundkey
+            key_state = [[] for _ in range(m)]
+            roundkey = keys[i]  
             for j in range(m):
                 for k in range(n):
-                    sum=sum-cipher[i-1][j][k]
-                    v=math.floor((sum/pow(256,5)) * pow(10,10,256))
-                    diff_state[j].append(cipher[i-1][j][k] ^ v)
-                    if j==1 and k==1:
-                        diff_state[j][k] = diff_state[j][k]^124
+                    key_state[j].append(roundkey[j][k] ^ decipher[9-i][j][k])
+            #print(decipher[i])
+            #print(decipher[0][m-1][n-1])
 
-            #print(dif_state)
-            
-            #shift rows
-            shiftrow_state = [[] for _ in range(m)]
-            for j in range(m):
-                for k in range(n):
-                    shiftrow_state[j].append(diff_state[j][(k+j)%n])
-            #print(shiftrow_state)
-            
             #linear transformation
             lin_state = []
             trans_state = [[] for _ in range(m)]
             for j in range(m):
                 for k in range(n):
-                    lin_state.append(shiftrow_state[j][k])
+                    lin_state.append(key_state[j][k])
+
+            #print(lin_state)
 
             #print(lin_state)
             #Seperating 16 bytes into 4 groups of 4 bytes
@@ -107,10 +102,11 @@ def encrypt():
                 d=((((lin_state[j])<<8) +(lin_state[j+1])<<8) +(lin_state[j+2])<<8) +(lin_state[j+3])
                 
                 #applying linear transformation operations 
-                d1= left_cycle(d ^ left_cycle(c,3) ^ left_cycle(a,10),7)
-                b1= left_cycle(left_cycle(a,13) ^ left_cycle(c,7) ^ b,1)
-                a1= left_cycle(b1 ^ d1 ^left_cycle(a,13),5) 
-                c1= left_cycle(right_cycle(b1,7) ^ c ^ d1,22)
+                a1= right_cycle(b ^ d ^ right_cycle(a,5),13) 
+                c1= right_cycle(c,22) ^ d ^ left_cycle(b,7)
+                b1= right_cycle(b,1) ^ right_cycle(a1,13) ^ right_cycle(c1,7)
+                d1= right_cycle(d,7) ^ right_cycle(c1,3) ^ right_cycle(a1,10)
+
 
                 #converting back to 32 bit binary
 
@@ -152,30 +148,113 @@ def encrypt():
                 for k in range(n):
                     trans_state[j].append(lin_state[x])
                     x=x+1
-                    
-            #add roundkey
-            roundkey = keys[i]  
+            
+             
+            #shift rows
+            
+            shiftrow_state = [[] for _ in range(m)]
             for j in range(m):
                 for k in range(n):
-                    cipher[i][j].append(roundkey[j][k] ^ trans_state[j][k])
-            #print(cipher[i])
-
-        else:
-            #print(cipher[0][m-1][n-1])
+                    #print((k+j)%n)
+                    shiftrow_state[j].append(trans_state[j][(k-j + n)%n])
+            #print(diff_state[1])
+            #print(shiftrow_state[1])
 
             #diffusion step
             #print(sum)
             diff_state = [[0 for _ in range(n)] for _ in range(m)]
-            for j in range(m-1,-1,-1):
-                for k in range(n-1,-1,-1):
-                    sum=sum-cipher[i-1][j][k]
+            for j in range(m):
+                for k in range(n):
+                    sum=sum-decipher[9-i][j][k]
                     v=math.floor(((sum/pow(256,5)) * pow(10,10))%256)
                     #print(v)
-                    diff_state[j][k]=(cipher[i-1][j][k] ^ v)
+                    diff_state[j][k]=(shiftrow_state[j][k] ^ v)
                     if j==m and k==n:
                         diff_state[j][k] = diff_state[j][k]^124
+            
+            for j in range(m):
+                for k in range(n):
+                    decipher[10-i][j].append(diff_state[j][k])
+           
 
-            #print(diff_state)
+        else:
+            #add roundkey
+            key_state = [[] for _ in range(m)]
+            roundkey = keys[i]  
+            for j in range(m):
+                for k in range(n):
+                    key_state[j].append(roundkey[j][k] ^ decipher[9-i][j][k])
+            #print(decipher[i])
+            #print(decipher[0][m-1][n-1])
+
+            #linear transformation
+            lin_state = []
+            trans_state = [[] for _ in range(m)]
+            for j in range(m):
+                for k in range(n):
+                    lin_state.append(key_state[j][k])
+
+            #print(lin_state)
+            #Seperating 16 bytes into 4 groups of 4 bytes
+            for k in range(0,m*n,16):
+                j=k
+                a=((((lin_state[j])<<8) +(lin_state[j+1])<<8) +(lin_state[j+2])<<8) +(lin_state[j+3])
+                
+                j+=4
+                b=((((lin_state[j])<<8) +(lin_state[j+1])<<8) +(lin_state[j+2])<<8) +(lin_state[j+3])
+               
+                j+=4
+                c=((((lin_state[j])<<8) +(lin_state[j+1])<<8) +(lin_state[j+2])<<8) +(lin_state[j+3])
+                
+                j+=4
+                d=((((lin_state[j])<<8) +(lin_state[j+1])<<8) +(lin_state[j+2])<<8) +(lin_state[j+3])
+                
+                #applying linear transformation operations 
+                a1= right_cycle(b ^ d ^ right_cycle(a,5),13) 
+                c1= right_cycle(c,22) ^ d ^ left_cycle(b,7)
+                b1= right_cycle(b,1) ^ right_cycle(a1,13) ^ right_cycle(c1,7)
+                d1= right_cycle(d,7) ^ right_cycle(c1,3) ^ right_cycle(a1,10)
+
+                #converting back to 32 bit binary
+
+                a1 = ( bin(a1)[2:] ).zfill(32)
+                b1 = ( bin(b1)[2:] ).zfill(32)
+                c1 = ( bin(c1)[2:] ).zfill(32)
+                d1 = ( bin(d1)[2:] ).zfill(32)
+
+            #putting the values back to linear state list
+            for j in range(0,m*n,16):
+                k=j
+                lin_state[k]=int(a1[0:8],2) 
+                lin_state[k+1]=int(a1[8:16],2) 
+                lin_state[k+2]=int(a1[16:24],2) 
+                lin_state[k+3]=int(a1[24:32],2)
+                
+                k+=4
+                lin_state[k]=int(b1[0:8],2) 
+                lin_state[k+1]=int(b1[8:16],2) 
+                lin_state[k+2]=int(b1[16:24],2) 
+                lin_state[k+3]=int(b1[24:32],2)
+                
+                k+=4
+                lin_state[k]=int(c1[0:8],2) 
+                lin_state[k+1]=int(c1[8:16],2) 
+                lin_state[k+2]=int(c1[16:24],2) 
+                lin_state[k+3]=int(c1[24:32],2)
+                
+                k+=4
+                lin_state[k]=int(d1[0:8],2) 
+                lin_state[k+1]=int(d1[8:16],2) 
+                lin_state[k+2]=int(d1[16:24],2) 
+                lin_state[k+3]=int(d1[24:32],2)
+                #print(lin_state)            
+            
+            #Converting the list back to a matrix
+            x=0
+            for j in range(m):
+                for k in range(n):
+                    trans_state[j].append(lin_state[x])
+                    x=x+1
             
             #shift rows
             
@@ -183,112 +262,52 @@ def encrypt():
             for j in range(m):
                 for k in range(n):
                     #print((k+j)%n)
-                    shiftrow_state[j].append(diff_state[j][(k+j)%n])
+                    shiftrow_state[j].append(trans_state[j][(k-j + n)%n])
             #print(diff_state[1])
             #print(shiftrow_state[1])
-            
-            #linear transformation
-            lin_state = []
-            trans_state = [[] for _ in range(m)]
-            for j in range(m):
-                for k in range(n):
-                    lin_state.append(shiftrow_state[j][k])
-
-            #print(lin_state)
-            #Seperating 16 bytes into 4 groups of 4 bytes
-            for k in range(0,m*n,16):
-                j=k
-                a=((((lin_state[j])<<8) +(lin_state[j+1])<<8) +(lin_state[j+2])<<8) +(lin_state[j+3])
-                
-                j+=4
-                b=((((lin_state[j])<<8) +(lin_state[j+1])<<8) +(lin_state[j+2])<<8) +(lin_state[j+3])
-               
-                j+=4
-                c=((((lin_state[j])<<8) +(lin_state[j+1])<<8) +(lin_state[j+2])<<8) +(lin_state[j+3])
-                
-                j+=4
-                d=((((lin_state[j])<<8) +(lin_state[j+1])<<8) +(lin_state[j+2])<<8) +(lin_state[j+3])
-                
-                #applying linear transformation operations 
-                d1= left_cycle(d ^ left_cycle(c,3) ^ left_cycle(a,10),7)
-                b1= left_cycle(left_cycle(a,13) ^ left_cycle(c,7) ^ b,1)
-                a1= left_cycle(b1 ^ d1 ^left_cycle(a,13),5) 
-                c1= left_cycle(right_cycle(b1,7) ^ c ^ d1,22)
-
-                #converting back to 32 bit binary
-
-                a1 = ( bin(a1)[2:] ).zfill(32)
-                b1 = ( bin(b1)[2:] ).zfill(32)
-                c1 = ( bin(c1)[2:] ).zfill(32)
-                d1 = ( bin(d1)[2:] ).zfill(32)
-
-            #putting the values back to linear state list
-            for j in range(0,m*n,16):
-                k=j
-                lin_state[k]=int(a1[0:8],2) 
-                lin_state[k+1]=int(a1[8:16],2) 
-                lin_state[k+2]=int(a1[16:24],2) 
-                lin_state[k+3]=int(a1[24:32],2)
-                
-                k+=4
-                lin_state[k]=int(b1[0:8],2) 
-                lin_state[k+1]=int(b1[8:16],2) 
-                lin_state[k+2]=int(b1[16:24],2) 
-                lin_state[k+3]=int(b1[24:32],2)
-                
-                k+=4
-                lin_state[k]=int(c1[0:8],2) 
-                lin_state[k+1]=int(c1[8:16],2) 
-                lin_state[k+2]=int(c1[16:24],2) 
-                lin_state[k+3]=int(c1[24:32],2)
-                
-                k+=4
-                lin_state[k]=int(d1[0:8],2) 
-                lin_state[k+1]=int(d1[8:16],2) 
-                lin_state[k+2]=int(d1[16:24],2) 
-                lin_state[k+3]=int(d1[24:32],2)
-                #print(lin_state)            
-            
-            #Converting the list back to a matrix
-            x=0
-            for j in range(m):
-                for k in range(n):
-                    trans_state[j].append(lin_state[x])
-                    x=x+1
                     
+
+            #diffusion step
+            #print(sum)
+            diff_state = [[0 for _ in range(n)] for _ in range(m)]
+            for j in range(m-1,-1,-1):
+                for k in range(n-1,-1,-1):
+                    sum=sum-decipher[9-i][j][k]
+                    v=math.floor(((sum/pow(256,5)) * pow(10,10))%256)
+                    #print(v)
+                    diff_state[j][k]=(shiftrow_state[j][k] ^ v)
+                    if j==m and k==n:
+                        diff_state[j][k] = diff_state[j][k]^124
             
-                    
-            #add roundkey
-            roundkey = keys[i]  
             for j in range(m):
                 for k in range(n):
-                    cipher[i][j].append(roundkey[j][k] ^ trans_state[j][k])
-            #print(cipher[i])
-        
-    #round 10 
+                    decipher[10-i][j].append(diff_state[j][k])
+
+            #print(diff_state)
+
+    #round 0 
         
     #add roundkey
-    roundkey = keys[10]  
+    roundkey = keys[0]  
     for j in range(m):
         for k in range(n):
-            cipher[10][j].append(roundkey[j][k] ^ cipher[9][j][k])
-    #print(cipher[10])
+            decipher[10][j].append(roundkey[j][k] ^ decipher[9][j][k])
+    #print(decipher[10])
     im=np.zeros((m,n))
-    #im=cipher[10]
-    im = np.asarray(cipher[10])
+    #im=decipher[10]
+    im = np.asarray(decipher[10])
     print("Encrypted matrix:")
-    print(cipher[10])
+    print(decipher[10])
     #converting the array to an encrypted image
     Image.fromarray(im).show()
-    Image.fromarray(im).save('encrypted.png')
    
-    #print(cipher[10])
+    #print(decipher[10])
 
 
 
 
 
 
-encrypt()
+decrypt()
 
 print("\n")
