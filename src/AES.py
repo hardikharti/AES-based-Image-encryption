@@ -57,6 +57,7 @@ def encrypt():
     #rounds 1-9
 
     for i in range(1,10):
+        
         sum=0
         for j in range(m):
                 for k in range(n):
@@ -70,7 +71,7 @@ def encrypt():
             for j in range(m):
                 for k in range(n):
                     sum=sum-cipher[i-1][j][k]
-                    v=math.floor((sum/pow(256,5)) * pow(10,10,256))
+                    v=math.floor(((sum/pow(256,5)) * pow(10,10))%256)
                     diff_state[j].append(cipher[i-1][j][k] ^ v)
                     if j==1 and k==1:
                         diff_state[j][k] = diff_state[j][k]^124
@@ -172,10 +173,10 @@ def encrypt():
                     v=math.floor(((sum/pow(256,5)) * pow(10,10))%256)
                     #print(v)
                     diff_state[j][k]=(cipher[i-1][j][k] ^ v)
-                    if j==m and k==n:
+                    if j==m-1 and k==n-1:
                         diff_state[j][k] = diff_state[j][k]^124
 
-            #print(diff_state)
+            
             
             #shift rows
             
@@ -280,7 +281,7 @@ def encrypt():
     print(cipher[10])
     #converting the array to an encrypted image
     Image.fromarray(im).show()
-    Image.fromarray(im).save('encrypted.png')
+    #Image.fromarray(im).save('encrypted.png')
    
     #print(cipher[10])
 
@@ -290,5 +291,6 @@ def encrypt():
 
 
 encrypt()
+
 
 print("\n")
