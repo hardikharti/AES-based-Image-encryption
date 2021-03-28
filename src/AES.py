@@ -281,6 +281,7 @@ def encrypt():
     print(cipher[10])
     #converting the array to an encrypted image
     Image.fromarray(im).show()
+    cv2.imwrite('encrypted.png',np.float32(Image.fromarray(im)))
     #Image.fromarray(im).save('encrypted.png')
    
     #print(cipher[10])

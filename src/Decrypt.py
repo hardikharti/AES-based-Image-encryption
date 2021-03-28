@@ -1,17 +1,18 @@
 import math
 import numpy as np
 from cv2 import cv2
+import matplotlib
 import matplotlib.pyplot as plt
 import chaos #chaos file
 from PIL import Image
 
 #Reading the image
 
-img = cv2.imread(r'C:\Users\hardi\Documents\GitHub\AES-based-Image-encryption\src\image.png',0)
+img = cv2.imread(r'C:\Users\hardi\Documents\GitHub\AES-based-Image-encryption\src\encrypted.png',0)
 m,n = img.shape
 matrix=img
 print("Shape of the matrix:",m,n)
-
+#print(matrix)
 
 def get_roundkeys():
   #round keys from chaos 
@@ -57,6 +58,7 @@ def decrypt():
     #rounds 9-1
 
     for i in range(9,0,-1):
+        #print(decipher[9-i])
         sum=0
         for j in range(m):
                 for k in range(n):
@@ -65,9 +67,6 @@ def decrypt():
 
        
         if i%2==0:
-              
-            
-            
             #add roundkey
             key_state = [[] for _ in range(m)]
             roundkey = keys[i]  
@@ -163,14 +162,15 @@ def decrypt():
             #diffusion step
             #print(sum)
             diff_state = [[0 for _ in range(n)] for _ in range(m)]
-            for j in range(m):
-                for k in range(n):
-                    sum=sum-decipher[9-i][j][k]
+            sum=0
+            for j in range(m-1,-1,-1):
+                for k in range(n-1,-1,-1):
                     v=math.floor(((sum/pow(256,5)) * pow(10,10))%256)
                     #print(v)
                     diff_state[j][k]=(shiftrow_state[j][k] ^ v)
-                    if j==m and k==n:
+                    if j==1 and k==1:
                         diff_state[j][k] = diff_state[j][k]^124
+                    sum+= diff_state[j][k]
             
             for j in range(m):
                 for k in range(n):
@@ -268,19 +268,21 @@ def decrypt():
                     shiftrow_state[j].append(trans_state[j][(k-j + n)%n])
             #print(diff_state[1])
             #print(shiftrow_state[1])
-                    
+                   
 
             #diffusion step
             #print(sum)
             diff_state = [[0 for _ in range(n)] for _ in range(m)]
-            for j in range(m-1,-1,-1):
-                for k in range(n-1,-1,-1):
-                    sum=sum-decipher[9-i][j][k]
+            sum=0
+            for j in range(m):
+                for k in range(n):
+                    
                     v=math.floor(((sum/pow(256,5)) * pow(10,10))%256)
                     #print(v)
                     diff_state[j][k]=(shiftrow_state[j][k] ^ v)
-                    if j==m and k==n:
+                    if j==m-1 and k==n-1:
                         diff_state[j][k] = diff_state[j][k]^124
+                    sum+= diff_state[j][k]
             
             for j in range(m):
                 for k in range(n):
@@ -303,6 +305,10 @@ def decrypt():
     print(decipher[10])
     #converting the array to an encrypted image
     Image.fromarray(im).show()
+    
+
+
+    
    
     #print(decipher[10])
 
