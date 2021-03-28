@@ -114,10 +114,10 @@ def encrypt():
 
                 #converting back to 32 bit binary
 
-                a1 = ( bin(a1)[2:] ).zfill(32)
-                b1 = ( bin(b1)[2:] ).zfill(32)
-                c1 = ( bin(c1)[2:] ).zfill(32)
-                d1 = ( bin(d1)[2:] ).zfill(32)
+                a1 = ( bin(a1 if a1>0 else -a1)[2:] ).zfill(32)
+                b1 = ( bin(b1 if b1>0 else -b1)[2:] ).zfill(32)
+                c1 = ( bin(c1 if c1>0 else -c1)[2:] ).zfill(32)
+                d1 = ( bin(d1 if d1>0 else -d1)[2:] ).zfill(32)
 
             #putting the values back to linear state list
             for j in range(0,m*n,16):
@@ -217,10 +217,10 @@ def encrypt():
 
                 #converting back to 32 bit binary
 
-                a1 = ( bin(a1)[2:] ).zfill(32)
-                b1 = ( bin(b1)[2:] ).zfill(32)
-                c1 = ( bin(c1)[2:] ).zfill(32)
-                d1 = ( bin(d1)[2:] ).zfill(32)
+                a1 = ( bin(a1 if a1>0 else -a1)[2:] ).zfill(32)
+                b1 = ( bin(b1 if b1>0 else -b1)[2:] ).zfill(32)
+                c1 = ( bin(c1 if c1>0 else -c1)[2:] ).zfill(32)
+                d1 = ( bin(d1 if d1>0 else -d1)[2:] ).zfill(32)
 
             #putting the values back to linear state list
             for j in range(0,m*n,16):

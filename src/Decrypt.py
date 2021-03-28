@@ -110,10 +110,10 @@ def decrypt():
 
                 #converting back to 32 bit binary
 
-                a1 = ( bin(a1)[2:] ).zfill(32)
-                b1 = ( bin(b1)[2:] ).zfill(32)
-                c1 = ( bin(c1)[2:] ).zfill(32)
-                d1 = ( bin(d1)[2:] ).zfill(32)
+                a1 = ( bin(a1 if a1>0 else -a1)[2:] ).zfill(32)
+                b1 = ( bin(b1 if b1>0 else -b1)[2:] ).zfill(32)
+                c1 = ( bin(c1 if c1>0 else -c1)[2:] ).zfill(32)
+                d1 = ( bin(d1 if d1>0 else -d1)[2:] ).zfill(32)
 
             #putting the values back to linear state list
             for j in range(0,m*n,16):
@@ -194,7 +194,7 @@ def decrypt():
                 for k in range(n):
                     lin_state.append(key_state[j][k])
 
-            #print(lin_state)
+ #print(lin_state)
             #Seperating 16 bytes into 4 groups of 4 bytes
             for k in range(0,m*n,16):
                 j=k
@@ -209,18 +209,21 @@ def decrypt():
                 j+=4
                 d=((((lin_state[j])<<8) +(lin_state[j+1])<<8) +(lin_state[j+2])<<8) +(lin_state[j+3])
                 
+                
                 #applying linear transformation operations 
                 a1= right_cycle(b ^ d ^ right_cycle(a,5),13) 
                 c1= right_cycle(c,22) ^ d ^ left_cycle(b,7)
                 b1= right_cycle(b,1) ^ right_cycle(a1,13) ^ right_cycle(c1,7)
                 d1= right_cycle(d,7) ^ right_cycle(c1,3) ^ right_cycle(a1,10)
-
+                
                 #converting back to 32 bit binary
-
-                a1 = ( bin(a1)[2:] ).zfill(32)
-                b1 = ( bin(b1)[2:] ).zfill(32)
-                c1 = ( bin(c1)[2:] ).zfill(32)
-                d1 = ( bin(d1)[2:] ).zfill(32)
+                #print((c1))
+                a1 = ( bin(a1 if a1>0 else -a1)[2:] ).zfill(32)
+                b1 = ( bin(b1 if b1>0 else -b1)[2:] ).zfill(32)
+                c1 = ( bin(c1 if c1>0 else -c1)[2:] ).zfill(32)
+                d1 = ( bin(d1 if d1>0 else -d1)[2:] ).zfill(32)
+                #print((c1))
+                #print(c1)
 
             #putting the values back to linear state list
             for j in range(0,m*n,16):
