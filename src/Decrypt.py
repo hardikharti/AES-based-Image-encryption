@@ -289,7 +289,7 @@ def decrypt():
                     decipher[10-i][j].append(diff_state[j][k])
 
             #print(diff_state)
-
+    im1 = chaos.img
     #round 0 
         
     #add roundkey
@@ -302,9 +302,10 @@ def decrypt():
     #im=decipher[10]
     im = np.asarray(decipher[10])
     print("Encrypted matrix:")
-    print(decipher[10])
+    print(im)
+
     #converting the array to an encrypted image
-    Image.fromarray(im).show()
+    Image.fromarray(im1).show()
     
 
 

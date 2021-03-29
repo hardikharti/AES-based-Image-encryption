@@ -2,6 +2,11 @@ import numpy as np
 from cv2 import cv2
 import matplotlib.pyplot as plt
 from PIL import Image
+#reading the image and storing it in an array
+img = cv2.imread(r'C:\Users\hardi\Documents\GitHub\AES-based-Image-encryption\src\image.png',0)
+m,n = img.shape
+arr = img
+#print(m,n)
 
 #function to update the values in p1 and p2 arrays
 def pinit(x1,x2,y1,y2,a1,a2,b1,b2,m,n,p1,p2):
@@ -73,11 +78,7 @@ def kinit(K,u,v,p1,p2,r,N,m,n,arr):
 
 
 def main():
-    #reading the image and storing it in an array
-    img = cv2.imread(r'C:\Users\hardi\Documents\GitHub\AES-based-Image-encryption\src\image.png',0)
-    m,n = img.shape
-    arr = img
-    #print(m,n)
+    
 
     #initializing the parameters for chaos map
     x1,y1,a1,b1 = 0.75,0.53,3.0,4.0
